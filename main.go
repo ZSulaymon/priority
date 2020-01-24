@@ -58,7 +58,7 @@ func (receiver *queue) dequeue() queue {
 		return queue{}
 	}
 
-	firstToReturn := queue{
+	BeThefirstToReturn := queue{
 		firstEl: receiver.firstEl,
 		lastEl:  nil,
 		size:    0,
@@ -68,7 +68,7 @@ func (receiver *queue) dequeue() queue {
 	if receiver.size == 0 {
 		receiver.lastEl = receiver.firstEl
 	}
-	return firstToReturn
+	return BeThefirstToReturn
 }
 
 func main() {}
