@@ -7,29 +7,35 @@ type queue struct {
 }
 
 type queueNode struct {
-	nextEl   *queueNode
-	prevEl   *queueNode
-	priority int
+	nextEl *queueNode
+	prevEl *queueNode
+	value  int
 }
 
 func (receiver *queue) len() int {
 	return receiver.size
 }
 
-func (receiver *queue) first() *queueNode {
-	return receiver.firstEl
+func (receiver *queue) first() interface{} {
+	if receiver.firstEl == nil {
+		return nil
+	}
+	return receiver.firstEl.value
 }
 
-func (receiver *queue) last() *queueNode {
-	return receiver.lastEl
+func (receiver *queue) last() interface{} {
+	if receiver.lastEl == nil {
+		return nil
+	}
+	return receiver.lastEl.value
 }
 
-func (receiver *queue) equeue(priority int) {
+func (receiver *queue) equeue(value int) {
 	if receiver.len() == 0 {
 		receiver.firstEl = &queueNode{
-			nextEl:   nil,
-			prevEl:   nil,
-			priority: priority,
+			nextEl: nil,
+			prevEl: nil,
+			value:  value,
 		}
 		receiver.lastEl = receiver.firstEl
 		receiver.size++
@@ -37,19 +43,21 @@ func (receiver *queue) equeue(priority int) {
 	}
 	receiver.size++
 	current := receiver.firstEl
-	if current != nil {
-		for {
-			if current.nextEl == nil {
-				current.nextEl = &queueNode{
-					nextEl:   nil,
-					prevEl:   current,
-					priority: priority,
-				}
-				receiver.lastEl = current.nextEl
-				break
+	if current == nil {
+		return
+	}
+
+	for {
+		if current.nextEl == nil {
+			current.nextEl = &queueNode{
+				nextEl: nil,
+				prevEl: current,
+				value:  value,
 			}
-			current = current.nextEl
+			receiver.lastEl = current.nextEl
+			break
 		}
+		current = current.nextEl
 	}
 }
 
@@ -58,7 +66,7 @@ func (receiver *queue) dequeue() queue {
 		return queue{}
 	}
 
-	BeThefirstToReturn := queue{
+	firstToReturn := queue{
 		firstEl: receiver.firstEl,
 		lastEl:  nil,
 		size:    0,
@@ -68,7 +76,7 @@ func (receiver *queue) dequeue() queue {
 	if receiver.size == 0 {
 		receiver.lastEl = receiver.firstEl
 	}
-	return BeThefirstToReturn
+	return firstToReturn
 }
 
 func main() {}
