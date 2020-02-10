@@ -4,68 +4,121 @@ import (
 	"testing"
 )
 
-func Test_empty_queue(t *testing.T) {
-	q := queue{}
-	if q.len() != 0 {
-		t.Error("empty queue length must be zero, got:", q.len())
+func TestIndex(t *testing.T) {
+	tests := []struct {
+		name      string
+		items     [] int
+		predicate func(int) bool
+		want      int
+	}{
+		{"Index exist", []int{1, 2, 3, 4, 5, 6, 7, 8, 9}, func(i int) bool {
+			return i == 9
+		}, 8},
+		{"Index does not exist", []int{1, 2, 3, 4, 5, 6, 7, 8, 9}, func(i int) bool {
+			return i == 10
+		}, -1},
 	}
-	if q.first() != nil {
-		t.Error("first element of queue must have value of 0, got:", q.first())
-	}
-	if q.last() != nil {
-		t.Error("last element of queue must have value of 0, got:", q.last())
-	}
-	if q.last() != q.first() {
-		t.Error("first and last elements of one item queue must have same priorities, got:", q.last(), ";", q.first())
-	}
-}
-
-func Test_queue_with_one_item(t *testing.T) {
-	q := queue{}
-	q.equeue(1)
-	if q.len() != 1 {
-		t.Error("after adding one item queue length must be 1, got:", q.len())
-	}
-	if q.first() != 1 {
-		t.Error("first element of queue must have value of 1, got:", q.first())
-	}
-	if q.last() != 1 {
-		t.Error("last element of queue must have value of 1, got:", q.last())
-	}
-	if q.last() != q.first() {
-		t.Error("first and last elements of one item queue must have same values, got:", q.last(), ";", q.first())
+	for _, tt := range tests {
+		if got := Index(tt.items, tt.predicate); got != tt.want {
+			t.Errorf("Test for %v Index() = %v, want %v", tt.name, got, tt.want)
+		}
 	}
 }
 
-func Test_queue_with_multiple_item(t *testing.T) {
-	q := queue{}
-	q.equeue(1)
-	q.equeue(2)
-	q.equeue(3)
-	if q.len() != 3 {
-		t.Error("after adding three item queue length must be 2, got:", q.len())
+func TestAll(t *testing.T) {
+	tests := []struct {
+		name      string
+		items     []int
+		predicate func(int) bool
+		want      bool
+	}{
+		{"All true", []int{1, 2, 3, 4, 5, 6, 7, 8, 9}, func(i int) bool {
+			return i == 9
+		}, false},
+		{"All false", []int{2, 2, 2, 2, 2, 2, 2, 2, 2}, func(i int) bool {
+			return i == 2
+		}, true},
 	}
-	if q.first() != 1 {
-		t.Error("first element of queue must have value of 1, got:", q.first())
-	}
-	if q.last() != 3 {
-		t.Error("last element of queue must have value of 2, got:", q.last())
-	}
-}
-
-func Test_queue_first_and_last_item(t *testing.T) {
-	q := queue{}
-	q.equeue(1)
-	if q.first() != q.last() {
-		t.Error("after adding one item to queue first and last item must be same, got: ", q.first())
+	for _, tt := range tests {
+		if got := All(tt.items, tt.predicate); got != tt.want {
+			t.Errorf("Test for %v All() = %v, want %v", tt.name, got, tt.want)
+		}
 	}
 }
 
-func Test_queue_for_deleting_item(t *testing.T) {
-	q := queue{}
-	q.equeue(2)
-	q.dequeue()
-	if q.first() != nil {
-		t.Error("deleting one item from queue it must be empty, got: ", q)
+func TestAny(t *testing.T) {
+	tests := []struct {
+		name      string
+		items     [] int
+		predicate func(int) bool
+		want      bool
+	}{
+		{"Any true", []int{1, 2, 3, 4, 5, 6, 7, 8, 9}, func(i int) bool {
+			return i == 9
+		}, true},
+		{"Any false", []int{1, 2, 3, 4, 5, 6, 7, 8, 9}, func(i int) bool {
+			return i == 10
+		}, false},
 	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Any(tt.items, tt.predicate); got != tt.want {
+				t.Errorf("Test for %v Any() = %v, want %v", tt.name, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNone(t *testing.T) {
+	tests := []struct {
+		name      string
+		items     []int
+		predicate func(int) bool
+		want      bool
+	}{
+		{"None false", []int{1, 2, 3, 4, 5, 6, 7, 8, 9}, func(i int) bool {
+			return i == 9
+		}, false},
+		{"None true", []int{1, 2, 3, 4, 5, 6, 7, 8, 9}, func(i int) bool {
+			return i == 10
+		}, true},
+	}
+	for _, tt := range tests {
+		if got := None(tt.items, tt.predicate); got != tt.want {
+			t.Errorf("Test for %v None() = %v, want %v", tt.name, got, tt.want)
+		}
+	}
+}
+
+func TestFind(t *testing.T) {
+
+	if Find([]int{1, 2, 3, 4, 5}, func(i int) bool {
+		return i == 2
+	}) != 2 {
+		t.Error("...")
+	}
+
+	func() {
+		defer func() {
+			err := recover()
+			if err == nil {
+				t.Error("Want panic!")
+			}
+		}()
+		Find([]int{1, 2, 3}, func(i int) bool {
+			return i == 6
+		})
+	}()
+
+	func() {
+		defer func() {
+			err := recover()
+			if err == nil {
+				t.Error("Want panic!")
+			}
+		}()
+		Find([]int{1, 2, 3}, func(i int) bool {
+			return i == -1
+		})
+	}()
 }
